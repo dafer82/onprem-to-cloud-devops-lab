@@ -120,3 +120,25 @@ Sobre ella se construirán las siguientes fases:
 - Integración híbrida con Azure
 
 Cada fase se documentará manteniendo coherencia con esta arquitectura base.
+
+---
+
+# Mermaid rendering issues (Markdown + GitHub)
+
+## Contexto
+Durante la documentación de la arquitectura del laboratorio DevOps híbrido, se decidió utilizar **Mermaid** para crear diagramas como código, manteniendo la documentación versionada junto al repositorio.
+
+El objetivo era evitar diagramas estáticos (PNG) y adoptar un enfoque _Doc-as-Code_ compatible con `GitHub`.
+
+---
+
+## Síntoma 
+**El diagrama Mermaid:**
+- Renderizaba correctamente en **Mermaid Live Editor**
+- Fallaba al renderizar en:
+    - Vista previa de Markdown en VS Code
+    - Preview del repositorio en GitHub
+
+El error presentadó era similar a: 
+**_Parse error on line X:_**
+**_Expecting 'SEMI', 'NEWLINE', 'EOF', ..._**
