@@ -31,6 +31,8 @@ Documentar la creación y configuración inicial de las máquinas virtuales del 
     - Host-Only (comunicación interna del laboratorio)
 - La instalación de los sistemas operativos se documentará en pasos posteriores
 
+---
+
 ## Windows VM Creation – SRV-AD-01
 
 ### Descripción general
@@ -51,3 +53,11 @@ Esta máquina virtual está diseñada para actuar como el controlador de dominio
 - La máquina virtual se crea apagada.
 - Se configurarán adaptadores de red adicionales después de la instalación del sistema operativo.
 - La asignación de recursos está pensada para un entorno de laboratorio, no productivo.
+
+---
+
+## Linux VM Creation - SRV-LNX-01
+
+### Descripción general
+
+
