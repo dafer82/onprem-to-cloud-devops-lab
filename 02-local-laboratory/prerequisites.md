@@ -42,3 +42,4 @@ Verificación en Windows (PowerShell):
 ```powershell
 systeminfo | Select-String "Virtual"
 ```
+- “Si VirtualBox falla en Windows 11, revisar `03-troubleshooting\conflict-hyperv-virtualbox.md`
