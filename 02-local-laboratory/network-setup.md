@@ -47,5 +47,34 @@ En VirtualBox:
 En PowerShell:
 
 ```powershell
-Get-NetAdapter | Select-Object Name, Status, LinkSpeed
+Get-NetAdapter | Where-Object Name -Like "*VirtualBox*" | Select-Object Name, Status, LinkSpeed
 ```
+
+### 3.2 Verificar IP del adaptador Host-Only
+
+```powershell
+Get-NetIPAddress | Where-Object IPAddress -Like "192.168.56.*"
+ ```
+
+---
+
+## 4. Consideraciones por interfaz de red
+
+Cada máquina virtual contará con dos interfaces de red:
+
+- **Interfaz NAT**
+  - Propósito: salida a Internet
+  - Dirección IP: asignada por VirtualBox (DHCP)
+  - Gateway: presente
+  - DNS: no utilizado para resolución interna
+
+- **Interfaz Host-Only**
+  - Propósito: red interna del laboratorio
+  - Dirección IP: estática
+  - Gateway: **no configurado**
+  - DNS: controlado por Active Directory (en fases posteriores)
+
+Esta separación evita:
+- Problemas de resolución DNS
+- Registro incorrecto de IPs en Active Directory
+- Rutas ambiguas en entornos híbridos

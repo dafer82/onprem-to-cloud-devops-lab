@@ -29,8 +29,8 @@ El propósito es disponer de un entorno funcional, reproducible y controlado ant
     - NAT (acceso a Internet)
     - Host-Only (red interna del laboratorio)
 - Máquinas virtuales:
-    -**SRV-AD-01** (Windows Server 2022)
-    -**SRV-LNX-01** (Debian Linux)
+    - **SRV-AD-01** (Windows Server 2022)
+    - **SRV-LNX-01** (Debian Linux)
 
 ---
 
@@ -40,6 +40,21 @@ El propósito es disponer de un entorno funcional, reproducible y controlado ant
 3. Crear máquinas virtuales
 4. Instalar sistemas operativos
 5. Validar conectividad básica
+
+---
+
+## Resultado esperado
+Al finalizar esta sección, se dispone de:
+
+- Dos máquinas virtuales operativas
+- Conectividad a Internet vía NAT
+- Red interna Host-Only funcional
+- Base estable para:
+  - Active Directory
+  - Automatización
+  - Prácticas DevOps
+  - Integración híbrida con Azure
+
 
 Cada paso está documentado en archivos separados dentro de esta sección.
 
