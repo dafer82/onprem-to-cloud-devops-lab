@@ -19,7 +19,7 @@ Documentar la creación y configuración inicial de las máquinas virtuales del 
 
 ### SRV-LNX-01
 - Rol: Servidor Linux para contenedores y automatización
-- Sistema Operativo: Debian (stable)
+- Sistema Operativo: Debian GNU/Linux (stable – Debian 13 "Trixie")
 - Tipo: Servidor Linux
 
 ---
@@ -48,6 +48,7 @@ Esta máquina virtual está diseñada para actuar como el controlador de dominio
   - Allocation: Dynamic (default VirtualBox behavior)
 - Network:
   - Adapter 1: NAT (internet access during setup)
+  - Adapter 2 (future): Host-Only (internal lab network)
 
 ### Notas
 - La máquina virtual se crea apagada.
@@ -59,5 +60,25 @@ Esta máquina virtual está diseñada para actuar como el controlador de dominio
 ## Linux VM Creation - SRV-LNX-01
 
 ### Descripción general
+Esta máquina virtual actúa como el nodo operativo y de servicios ágiles del laboratorio. Su función principal es servir como host para el despliegue de microservicios mediante contenedores y como motor central de automatización (Infrastructure as Code) para gestionar el parque de servidores, incluido el controlador de dominio.
 
+### Configuración de la VM
+- OS: Debian GNU/Linux (stable – Debian 13 "Trixie")
+- CPU: 1 vCPU 
+- Memory: 2 GB RAM 
+- Disk:
+  - Type: VDI
+  - Max size: 50 GB
+  - Allocation: Dynamic
+- Network
+  - Adapter 1: NAT (internet access during setup)
+  - Adapter 2 (future): Host-Only (internal lab network)
 
+### Notas
+- Esta VM será integrada posteriormente al dominio Windows para utilizar Active Directory como fuente de identidad y DNS.
+- Desde este nodo se ejecutarán tareas de automatización y gestión remota sobre el entorno Windows.
+
+---
+
+## Estado de la etapa
+Con la creación de ambas máquinas virtuales finalizada, el laboratorio está listo para proceder con la instalación y configuración de los sistemas operativos.
