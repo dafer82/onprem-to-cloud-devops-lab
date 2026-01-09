@@ -1,0 +1,21 @@
+# Default: store as LF in repo, convert to CRLF on checkout when appropriate
+* text=auto eol=lf
+
+# Scripts should always be LF
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Config / IaC / docs -> LF
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.tf text eol=lf
+*.tfvars text eol=lf
+*.bicep text eol=lf
+
+# Windows scripts stay CRLF
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
