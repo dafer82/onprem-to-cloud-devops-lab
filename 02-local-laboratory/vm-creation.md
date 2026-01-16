@@ -63,7 +63,7 @@ Esta máquina virtual está diseñada para actuar como el controlador de dominio
 Esta máquina virtual actúa como el nodo operativo y de servicios ágiles del laboratorio. Su función principal es servir como host para el despliegue de microservicios mediante contenedores y como motor central de automatización (Infrastructure as Code) para gestionar el parque de servidores, incluido el controlador de dominio.
 
 ### Configuración de la VM
-- OS: Debian GNU/Linux (stable – Debian 13 "Trixie")
+- OS: Debian GNU/Linux (Debian 13 "Trixie")
 - CPU: 1 vCPU 
 - Memory: 2 GB RAM 
 - Disk:
