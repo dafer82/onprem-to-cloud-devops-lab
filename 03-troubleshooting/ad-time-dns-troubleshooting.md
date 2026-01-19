@@ -51,7 +51,7 @@ timedatectl
 - `NTP service: inactive`
 
 
-### Escenario IⅠ — Sincroniza, pero contra Internet
+### Escenario Ⅱ — Sincroniza, pero contra Internet
 
 **Síntoma**
 
@@ -67,7 +67,7 @@ timedatectl
 **Por qué pasa:**
 - `FallbackNTP=`activo
 - DHCP/NAT inyecta NTP público
-- system-timesyncd elige otro servidor
+- systemd-timesyncd elige otro servidor
 
 **Impacto**
 - Drift progresivo entre DC y cliente
@@ -92,7 +92,7 @@ timedatectl timesync-status
 
 ## 2️⃣ Problemas de DNS
 
-### Escenario IIⅠ — "Tengo DNS" pero no es AD
+### Escenario Ⅲ — "Tengo DNS" pero no es AD
 
 **Síntoma**
 
@@ -125,7 +125,7 @@ resolvectl status
 - DNS ≠ IP del DC 
 
 
-### Escenario ⅠV — DNS correcto, pero dominio no configurado
+### Escenario Ⅳ — DNS correcto, pero dominio no configurado
 
 **Síntoma**
 
@@ -157,7 +157,7 @@ resolvectl status
 🔎 **Mirar:** 
 - `Search Domains` o `Domain`
 
-### Escenario V — DNS correcto, pero en la NIC incorrecta
+### Escenario Ⅴ — DNS correcto, pero en la NIC incorrecta
 
 **Síntoma**
 - DNS aparece asociado a `enp0s3 (NAT)`
@@ -183,7 +183,7 @@ resolvectl status
 - No solo global
 
 
-### Escenario VⅠ — Todo parece bien, pero /etc/resolv.conf fue modificado 
+### Escenario Ⅵ — Todo parece bien, pero /etc/resolv.conf fue modificado 
 
 #### /etc/resolv.conf es regenerado inesperadamente
 
@@ -212,7 +212,7 @@ cat /etc/resolv.conf
 ✔️ Correcto si:
 - El contenido apunta solo al DC
 - No cambia tras reboot
-- No contiene DNS de Nat
+- No contiene DNS de NAT
 
 ❌ Incorrecto si:
 - Aparece DNS externo
@@ -223,7 +223,7 @@ cat /etc/resolv.conf
 #### /etc/resolv.conf sobrescrito por DHCP
 
 **Síntoma:**
-- nslookup cambia de sevidor
+- nslookup cambia de servidor
 - despues de reboot falla
 
 **Causa:**
@@ -247,7 +247,7 @@ UserDNS=no
 **Síntomas observados:**
 - `/etc/resolv.conf` apunta a DNS de NAT  
 - `nslookup corp.local` falla
-- `resolvctl` no refleja DNS del DC 
+- `resolvectl` no refleja DNS del DC 
 - `El error reaparece tras reboot
 
 **Corrección:**
@@ -264,6 +264,8 @@ UseDNS=no
 
    > ⚠️ En system-networkd, una directiva mal escrita **no falla**, simplemente **no existe**. Lo cual lo hace difícil de detectar.
 
+   > “Nota: tras corregir la directiva, es necesario reiniciar systemd-networkd para limpiar el estado DHCP previamente adquirido.”
+
 
 ### Regla preventiva de DNS
 ✔️ DNS = DC
@@ -274,7 +276,7 @@ UseDNS=no
 
 ## 3️⃣ Problemas combinados
 
-### Escenario VⅠI — DNS OK + Tiempo MAL = Kerberos roto
+### Escenario Ⅶ — DNS OK + Tiempo MAL = Kerberos roto
 
 **Síntoma**
 - DNS resuelve perfecto
@@ -301,4 +303,166 @@ resolvectl status
 - resolvectl status
 - nslookup corp.local
 
-> Este troubleshooting debe ejecutarse siempre antes de intentar un domain join.
+---
+
+## ✅ 1. Conclusión técnica 
+
+
+### Problema real 
+
+> El problema **no era la red**, ni el DC, ni Active Directory.
+> El problema fue un **DNS no persistente** causado por un modelo incompleto de **gestión de resolución de nombre** en Debian.
+
+
+### Causa raíz confirmada
+
+- `systemd-networkd` estaba correctamente configurado
+- **No se utilizaba** `systemd-resolved` 
+- `/etc/resolv.conf` quedaba:
+   - regenerado por DHCP (NAT)
+   - sobrescrito tras reboot
+> Una configuración DHCP inválida fue ignorada silenciosamente por systemd-networkd, permitiendo que el DNS entregado por DHCP sobrescribiera la configuración esperada.
+
+👉 Resultado:
+DNS  de AD funcionaba **a veces**, pero **no era determinista ni persistente**.
+
+---
+
+## ✅ 2. Resolución aplicada 
+
+**Modelo elegido (y documentado)**
+
+### 🅰️ Modelo A — DNS manual sin systemd-resolved
+
+
+**Características finales:**
+
+- ❌ No se usa `systemd-resolved`
+- ✅ `systemd-networkd` es el único gestor de red
+- ✅ DHCP no inyecta DNS
+- ✅ `/etc/resolv.conf` es la fuente final
+- ✅ Persistencia garantizada
+
+
+**Configuración final relevante**
+
+NAT (enp0s3)
+
+```ini
+[Network]
+DHCP=yes
+
+[DHCP]
+UseDNS=no
+
+```
+
+Host-Only (enp0s8)
+
+```ini
+[Network]
+Address=192.168.56.20/24
+DNS=192.168.56.10
+Domains=corp.local
+
+```
+
+/etc/resolv.conf
+
+```text
+search corp.local
+nameserver 192.168.56.10
+
+```
+
+(Opcional pero recomendado en lab)
+
+```bash
+sudo chattr +i /etc/resolv.conf
+
+```
+---
+
+✅ 3. Validaciones finales 
+Todos estos puntos deben cumplirse simultáneamente:
+
+
+**DNS**
+
+```bash
+nslookup corp.local
+
+```
+
+✔️ Resuelve
+✔️ Usa `192.168.56.10`
+
+```bash
+cat /etc/resolv.conf
+
+```
+
+✔️ Solo DNS del DC
+✔️ No DNS de NAT
+✔️ No cambia tras reboot
+
+
+**Red**
+
+```bash
+ip route
+
+```
+
+✔️ Default route por NAT
+✔️ Red `192.168.56.0/24` por Host-Only
+
+
+**Tiempo**
+
+```bash
+timedatectl
+
+```
+
+✔️ `System clock synchronized: yes`
+✔️ `NTP service: active`
+
+
+**Identidad**
+
+```bash
+hostname -f
+
+```
+
+✔️ `srv-lnx-01.corp.local`
+
+---
+
+## ✅ Checklist de cierre del Paso 3
+
+- DNS resuelve dominio AD
+
+- DNS es persistente tras reboot
+
+- DHCP no inyecta DNS
+
+- Tiempo sincronizado
+
+- Hostname correcto
+
+- Modelo documentado
+
+- Causa raíz identificada
+
+---
+
+> **Lección aprendida** 
+>
+> El error no fue técnico, fue de modelo mental.
+> No alcanza con **que funcione**: en AD tiene **que ser determinista, explícito y persistente**. 
+
+---
+
+> Nota: Este troubleshooting debe ejecutarse siempre antes de intentar un domain join.
